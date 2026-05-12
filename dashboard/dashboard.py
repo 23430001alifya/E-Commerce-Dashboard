@@ -4,7 +4,7 @@ import plotly.express as px
 import os
 
 # =========================
-# PAGE CONFIG
+# CONFIG
 # =========================
 st.set_page_config(
     page_title="ArthaPlan Dashboard",
@@ -18,91 +18,98 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* MAIN BACKGROUND */
+/* MAIN */
 .stApp {
-    background-color: #070B17;
-    color: white;
+    background-color: #F3F4F6;
 }
 
 /* SIDEBAR */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0F172A 0%, #111827 100%);
-    border-right: 1px solid #1E293B;
+    background-color: #E5E7EB;
+    padding-top: 20px;
 }
 
 [data-testid="stSidebar"] * {
-    color: white;
-}
-
-/* KPI CARD */
-.kpi-card {
-    background: linear-gradient(145deg, #111827, #1E293B);
-    padding: 25px;
-    border-radius: 20px;
-    border: 1px solid #334155;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-    transition: 0.3s;
-}
-
-.kpi-card:hover {
-    transform: translateY(-5px);
-    border: 1px solid #3B82F6;
-    box-shadow: 0 6px 25px rgba(59,130,246,0.25);
-}
-
-/* KPI TEXT */
-.kpi-title {
-    color: #94A3B8;
-    font-size: 13px;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-}
-
-.kpi-value {
-    color: white;
-    font-size: 32px;
-    font-weight: bold;
-}
-
-.kpi-sub {
-    color: #60A5FA;
-    margin-top: 10px;
-    font-size: 13px;
-}
-
-/* CHART BOX */
-.chart-box {
-    background: #111827;
-    padding: 20px;
-    border-radius: 20px;
-    border: 1px solid #334155;
-    margin-top: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-}
-
-/* TABLE BOX */
-.table-box {
-    background: #111827;
-    padding: 20px;
-    border-radius: 20px;
-    border: 1px solid #334155;
-    margin-top: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    color: #1E293B;
 }
 
 /* TITLE */
 .main-title {
-    font-size: 40px;
+    font-size: 55px;
     font-weight: bold;
-    color: white;
+    color: #1E293B;
 }
 
 .sub-title {
-    color: #94A3B8;
+    color: #6B7280;
     margin-bottom: 30px;
+    font-size: 18px;
 }
 
-/* REMOVE STREAMLIT MENU */
+/* KPI BOX */
+.metric-box {
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.metric-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* KPI TITLE */
+.metric-title {
+    font-size: 15px;
+    color: #6B7280;
+    margin-bottom: 10px;
+}
+
+/* KPI VALUE */
+.metric-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: #111827;
+}
+
+/* CHART BOX */
+.chart-box {
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-top: 20px;
+}
+
+/* TABLE BOX */
+.table-box {
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-top: 20px;
+}
+
+/* BUTTON */
+.stButton>button {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 18px;
+}
+
+.stButton>button:hover {
+    background-color: #1D4ED8;
+    color: white;
+}
+
+/* HIDE STREAMLIT */
 header {
     visibility: hidden;
 }
@@ -126,7 +133,7 @@ def load_data():
         if os.path.exists(path):
             return pd.read_csv(path)
 
-    st.error("❌ main_data.csv tidak ditemukan")
+    st.error("❌ File main_data.csv tidak ditemukan")
     st.stop()
 
 df = load_data()
@@ -183,34 +190,34 @@ df['overbudget'] = df['total_limit'] > df['total_limit'].mean()
 # =========================
 # SIDEBAR
 # =========================
-st.sidebar.image(
-    "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
-    width=90
-)
+st.sidebar.markdown("# ⚙️ Smart Filter Panel")
 
-st.sidebar.markdown("## 💰 ArthaPlan")
-st.sidebar.caption("Smart Financial Dashboard")
+st.sidebar.markdown("### 🏷️ Pilih Kategori")
 
-st.sidebar.markdown("---")
-
-# FILTER
 kategori = st.sidebar.multiselect(
-    "🏷️ Pilih Kategori",
+    "",
     df['kategori'].unique(),
     default=df['kategori'].unique()
 )
+
+st.sidebar.markdown("### 💰 Range Total Limit")
 
 min_limit = int(df['total_limit'].min())
 max_limit = int(df['total_limit'].max())
 
 range_limit = st.sidebar.slider(
-    "💰 Range Total Limit",
+    "",
     min_limit,
     max_limit,
     (min_limit, max_limit)
 )
 
-# APPLY FILTER
+# RESET BUTTON
+if st.sidebar.button("🔄 Reset Semua Filter"):
+    kategori = df['kategori'].unique()
+    range_limit = (min_limit, max_limit)
+
+# FILTER DATA
 df = df[
     (df['kategori'].isin(kategori)) &
     (df['total_limit'] >= range_limit[0]) &
@@ -222,110 +229,104 @@ df = df[
 # =========================
 st.markdown("""
 <div class='main-title'>
-💰 ArthaPlan Analytics Dashboard
+💰 ArthaPlan Dashboard
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class='sub-title'>
-Analisis perilaku finansial, segmentasi pengguna, dan overbudget risk
+Analisis perilaku finansial pengguna dan overbudget risk
 </div>
 """, unsafe_allow_html=True)
 
 # =========================
-# KPI SECTION
+# RINGKASAN
 # =========================
-col1, col2, col3, col4 = st.columns(4)
+st.subheader("📊 Ringkasan")
 
+col1, col2, col3 = st.columns(3)
+
+# TOTAL USER
 with col1:
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">👥 TOTAL USER</div>
-        <div class="kpi-value">{df['client_id'].nunique()}</div>
-        <div class="kpi-sub">pengguna aktif</div>
+    <div class="metric-box">
+        <div class="metric-title">Total User</div>
+        <div class="metric-value">
+            {df['client_id'].nunique()}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
+# TOTAL LIMIT
 with col2:
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">💰 AVG LIMIT</div>
-        <div class="kpi-value">Rp {df['total_limit'].mean():,.0f}</div>
-        <div class="kpi-sub">rata-rata limit</div>
+    <div class="metric-box">
+        <div class="metric-title">Total Limit</div>
+        <div class="metric-value">
+            Rp {df['total_limit'].sum():,.0f}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
+# AVG LIMIT
 with col3:
     st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">💳 JUMLAH KARTU</div>
-        <div class="kpi-value">{df['jumlah_kartu'].mean():.1f}</div>
-        <div class="kpi-sub">per pengguna</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col4:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-title">🚨 OVERBUDGET</div>
-        <div class="kpi-value">{df['overbudget'].sum()}</div>
-        <div class="kpi-sub">user berisiko</div>
+    <div class="metric-box">
+        <div class="metric-title">Rata-rata Limit</div>
+        <div class="metric-value">
+            Rp {df['total_limit'].mean():,.0f}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
 # =========================
-# CHARTS
-# =========================
-c1, c2 = st.columns(2)
-
 # PIE CHART
-with c1:
+# =========================
+st.markdown("<div class='chart-box'>", unsafe_allow_html=True)
 
-    st.markdown("<div class='chart-box'>", unsafe_allow_html=True)
+st.subheader("📊 Segmentasi Pengguna")
 
-    st.subheader("📊 Segmentasi Pengguna")
+fig1 = px.pie(
+    df,
+    names='kategori',
+    hole=0.5
+)
 
-    fig1 = px.pie(
-        df,
-        names='kategori',
-        hole=0.5
-    )
+fig1.update_layout(
+    paper_bgcolor='white',
+    plot_bgcolor='white',
+    font_color='black'
+)
 
-    fig1.update_layout(
-        paper_bgcolor="#111827",
-        plot_bgcolor="#111827",
-        font_color="white"
-    )
+st.plotly_chart(fig1, use_container_width=True)
 
-    st.plotly_chart(fig1, use_container_width=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
+# =========================
 # SCATTER CHART
-with c2:
+# =========================
+st.markdown("<div class='chart-box'>", unsafe_allow_html=True)
 
-    st.markdown("<div class='chart-box'>", unsafe_allow_html=True)
+st.subheader("📈 Total Limit vs Jumlah Kartu")
 
-    st.subheader("📈 Total Limit vs Jumlah Kartu")
+fig2 = px.scatter(
+    df,
+    x='jumlah_kartu',
+    y='total_limit',
+    color='kategori',
+    size='total_limit',
+    hover_data=['client_id']
+)
 
-    fig2 = px.scatter(
-        df,
-        x='jumlah_kartu',
-        y='total_limit',
-        color='kategori',
-        size='total_limit',
-        hover_data=['client_id']
-    )
+fig2.update_layout(
+    paper_bgcolor='white',
+    plot_bgcolor='white',
+    font_color='black'
+)
 
-    fig2.update_layout(
-        paper_bgcolor="#111827",
-        plot_bgcolor="#111827",
-        font_color="white"
-    )
+st.plotly_chart(fig2, use_container_width=True)
 
-    st.plotly_chart(fig2, use_container_width=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # =========================
 # HISTOGRAM
@@ -337,13 +338,13 @@ st.subheader("📉 Distribusi Total Limit")
 fig3 = px.histogram(
     df,
     x='total_limit',
-    nbins=50
+    nbins=40
 )
 
 fig3.update_layout(
-    paper_bgcolor="#111827",
-    plot_bgcolor="#111827",
-    font_color="white"
+    paper_bgcolor='white',
+    plot_bgcolor='white',
+    font_color='black'
 )
 
 st.plotly_chart(fig3, use_container_width=True)
